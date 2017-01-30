@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const password = require ('./KEYS'); // MySql auth password removed from git repo
 
-var sequelize = new Sequelize('nova', 'root', password, {
+var sequelize = new Sequelize('test', 'root', password, {
   host: 'localhost',
   dialect: 'mysql',
   port: 3306,
