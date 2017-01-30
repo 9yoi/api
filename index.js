@@ -54,22 +54,24 @@ app.post('/api/file', function (req, res) {
 
     // retrieve user record from database and update new meta
     User.findOne({where: {userId: id}}).then(function(user) {
-      console.log(user.dataValues, 'olduser');
-      user.meta1 = meta.meta1;
-      user.meta2 = meta.meta2;
-      console.log(user.dataValues, 'newuser');
+      user.update({
+        meta1: meta.meta1,
+        meta2: meta.meta2
+      }).then(function(){
+        console.log('update successful');
+      })
     })
+
+    // Commented out in development
 
     // delete file when work is completed
     // fs.unlink(path, function (err) {
     //   if (err) throw err;
-    //   console.log('successfully deleted ' + './file.txt');
+    //   console.log('successfully deleted file');
     // });      
   });
 
 })
-
-
 
 // helper function to parse meta data out of the file in Phase 2
 function parseText (data) {
@@ -81,3 +83,15 @@ function parseText (data) {
   })
   return meta;
 }
+
+// Endpoint for clients to request information
+// Example request format:
+// {"userId": "123"}
+app.post('/api/info', function (req, res) {
+  console.log(req.body, 'req');
+  var id = parseInt(req.body.userId);
+  console.log(id, 'iddd')
+  User.findOne({where: {userId: id}}).then(function(user) {
+   res.send(user.dataValues);
+  });
+})
