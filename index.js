@@ -2,13 +2,10 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
+
 const db = require ('./db.js');
 const User = db.User;
 const fs = require ('fs');
-
-app.get('/', function (req, res) {
-  res.send('Hello World!')
-})
 
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!')
@@ -17,16 +14,12 @@ app.listen(3000, function () {
 // connect mySQL, create database and schema           
 db.connect();
 
-// ENDPOINTS
-
-// Receive Phase 1 data
+// PHASE 1 USER DATA
 // Example request format: 
 // {"userId":"123", "firstName":"Mei", "lastName": "Png", "fileType": "txt", "fileTag": "mortgage"}
-app.post('/api/user', function (req, res) {
+app.post('/api/user/meta', function (req, res) {
   var user = req.body;
-  // For development, drop tables then create new if table already present
   User.sync({force: true}).then(function () {
-    // Table created
     return User.create({
       userId: parseInt(user.userId),
       firstName: user.firstName,
@@ -35,30 +28,28 @@ app.post('/api/user', function (req, res) {
       fileTag: user.fileTag
     });
   });
-
   res.send(`Success. Saved user: ${user.userId}`);
 })
 
-// Receive Phase 2 file
+// PHASE 2: FILE
 // Example request format:
 // {"path":"./file.txt","userId": "123"}
-app.post('/api/file', function (req, res) {
+
+app.post('/api/user/file', function (req, res) {
   var path = req.body.path;
   var id = parseInt(req.body.userId);
 
-  // Read Phase 2 file
+  // Read file and parse meta data
   fs.readFile(path, 'utf8', function (err, data) {
     if (err) throw err;
-    // data will contain your file contents
     var meta = parseText(data);
-
-    // retrieve user record from database and update new meta
+    // retrieve user record from database and update new meta from file
     User.findOne({where: {userId: id}}).then(function(user) {
       user.update({
         meta1: meta.meta1,
         meta2: meta.meta2
       }).then(function(){
-        console.log('update successful');
+        console.log('Phase 2: update of meta successful');
       })
     })
 
@@ -74,6 +65,7 @@ app.post('/api/file', function (req, res) {
 })
 
 // helper function to parse meta data out of the file in Phase 2
+// This is based on format of input in file.txt
 function parseText (data) {
   var meta = {};
   var firstParse = data.split(',');
@@ -84,10 +76,10 @@ function parseText (data) {
   return meta;
 }
 
-// Endpoint for clients to request information
+// DATA ENDPOINT:
 // Example request format:
 // {"userId": "123"}
-app.post('/api/info', function (req, res) {
+app.post('/api/data/user', function (req, res) {
   console.log(req.body, 'req');
   var id = parseInt(req.body.userId);
   console.log(id, 'iddd')
