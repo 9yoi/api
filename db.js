@@ -33,6 +33,12 @@ var User = sequelize.define('user', {
   },
   fileTag: {
     type: Sequelize.STRING
+  },
+  meta1: {
+    type: Sequelize.STRING
+  },
+  meta2: {
+    type: Sequelize.STRING
   }
 }, {
   freezeTableName: true // Model tableName will be the same as the model name

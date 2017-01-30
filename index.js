@@ -20,9 +20,11 @@ db.connect();
 // ENDPOINTS
 
 // Receive Phase 1 data
+// Example request format: 
+// {'userId':'123', 'firstName':'Mei', 'lastName': 'Png', 'fileType': 'txt', 'fileTag': 'mortgage'}
 app.post('/api/user', function (req, res) {
   var user = req.body;
-  // For development, drop tables if table already present
+  // For development, drop tables then create new if table already present
   User.sync({force: true}).then(function () {
     // Table created
     return User.create({
@@ -37,17 +39,37 @@ app.post('/api/user', function (req, res) {
   res.send(`Success. Saved user: ${user.userId}`);
 })
 
-// Read Phase 2 file
-fs.readFile('./file.txt', 'utf8', function (err, data) {
-  if (err) throw err;
-  // data will contain your file contents
-  console.log(data, 'file contents');
-  console.log(parseText(data));
-  // delete file
-  // fs.unlink('./file.txt', function (err) {
-  //   if (err) throw err;
-  //   console.log('successfully deleted ' + './file.txt');
-  // });      
-});
+// Receive Phase 2 file
+// Example request format:
+// {"path":"./file.txt","userId": "123'""}
+app.post('/api/file', function (req, res) {
+  var path = req.body.path;
+  var userId = req.body.userId;
 
-function parseText ()
+  // Read Phase 2 file
+  fs.readFile(path, 'utf8', function (err, data) {
+    if (err) throw err;
+    // data will contain your file contents
+    var meta = parseText(data);
+
+    // delete file when work is completed
+    // fs.unlink(path, function (err) {
+    //   if (err) throw err;
+    //   console.log('successfully deleted ' + './file.txt');
+    // });      
+  });
+
+})
+
+
+
+// helper function to parse meta data out of the file in Phase 2
+function parseText (data) {
+  var meta = {};
+  var firstParse = data.split(',');
+  firstParse.forEach(function(item) {
+    var subArr = item.split(':');
+    meta[subArr[0]] = subArr[1].trim();
+  })
+  return meta;
+}
