@@ -21,14 +21,14 @@ db.connect();
 
 // Receive Phase 1 data
 // Example request format: 
-// {'userId':'123', 'firstName':'Mei', 'lastName': 'Png', 'fileType': 'txt', 'fileTag': 'mortgage'}
+// {"userId":"123", "firstName":"Mei", "lastName": "Png", "fileType": "txt", "fileTag": "mortgage"}
 app.post('/api/user', function (req, res) {
   var user = req.body;
   // For development, drop tables then create new if table already present
   User.sync({force: true}).then(function () {
     // Table created
     return User.create({
-      userId: user.userId,
+      userId: parseInt(user.userId),
       firstName: user.firstName,
       lastName: user.lastName,
       fileType: user.fileType,
@@ -41,16 +41,24 @@ app.post('/api/user', function (req, res) {
 
 // Receive Phase 2 file
 // Example request format:
-// {"path":"./file.txt","userId": "123'""}
+// {"path":"./file.txt","userId": "123"}
 app.post('/api/file', function (req, res) {
   var path = req.body.path;
-  var userId = req.body.userId;
+  var id = parseInt(req.body.userId);
 
   // Read Phase 2 file
   fs.readFile(path, 'utf8', function (err, data) {
     if (err) throw err;
     // data will contain your file contents
     var meta = parseText(data);
+
+    // retrieve user record from database and update new meta
+    User.findOne({where: {userId: id}}).then(function(user) {
+      console.log(user.dataValues, 'olduser');
+      user.meta1 = meta.meta1;
+      user.meta2 = meta.meta2;
+      console.log(user.dataValues, 'newuser');
+    })
 
     // delete file when work is completed
     // fs.unlink(path, function (err) {
