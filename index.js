@@ -50,4 +50,4 @@ fs.readFile('./file.txt', 'utf8', function (err, data) {
   // });      
 });
 
-function parseText
+function parseText ()
