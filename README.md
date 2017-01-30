@@ -4,6 +4,7 @@
 - In mySQL terminal: `Create database test;`
 - cd into main nova folder and `npm install`
 - `node index.js`
+
   
 ## Summary
 - Server
