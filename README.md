@@ -3,6 +3,7 @@
 - `mysql.server start`
 - In mySQL terminal: `Create database test;`
 - cd into main nova folder and `npm install`
+- in 'index.js', update password to yours for mySQL database 
 - `node index.js`
 
   
